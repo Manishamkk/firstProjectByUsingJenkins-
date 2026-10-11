@@ -3,9 +3,9 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME = 'firstproject'
+        APP_NAME = 'firstProjectByUsingJenkins'
         IMAGE_TAG = '1.0'
-        CONTAINER_NAME = 'firstproject-container'
+        CONTAINER_NAME = 'firstProjectByUsingJenkins-container'
         HOST_PORT = '8081'
         CONTAINER_PORT = '1111'
     }
