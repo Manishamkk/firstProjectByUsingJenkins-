@@ -6,14 +6,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Starting Jenkins Build'
-                sh 'mvn clean package -DskipTests'
+                sh 'chmod +x mvnw'
+                sh './mvnw clean package -DskipTests'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Testing the application'
-                sh 'mvn test'
+                sh './mvnw test'
             }
         }
     }
