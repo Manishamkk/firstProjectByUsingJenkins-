@@ -6,13 +6,16 @@ pipeline {
         APP_NAME = 'firstproject'
         IMAGE_TAG = '1.0'
         CONTAINER_NAME = 'firstproject-container'
-        DOCKER_PORT = '1111'
+        HOST_PORT = '8081'
+        CONTAINER_PORT = '1111'
     }
 
     stages {
+
         stage('Build') {
             steps {
                 echo 'Building Spring Boot application...'
+
                 sh 'chmod +x mvnw'
                 sh './mvnw clean package -DskipTests'
             }
@@ -20,7 +23,8 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
+                echo 'Running JUnit test cases...'
+
                 sh './mvnw test'
             }
         }
@@ -28,29 +32,38 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo 'Building Docker image...'
+
                 sh '''
                     docker build \
                       -t ${APP_NAME}:${IMAGE_TAG} \
                       -t ${APP_NAME}:latest \
                       .
                 '''
+
+                echo 'Docker image created successfully.'
+
+                sh 'docker images'
             }
         }
 
         stage('Docker Run') {
             steps {
                 echo 'Removing previous container if present...'
+
                 sh '''
                     docker rm -f ${CONTAINER_NAME} || true
                 '''
 
                 echo 'Starting Spring Boot container...'
+
                 sh '''
                     docker run -d \
                       --name ${CONTAINER_NAME} \
-                      -p ${DOCKER_PORT}:${DOCKER_PORT} \
+                      -p ${HOST_PORT}:${CONTAINER_PORT} \
                       ${APP_NAME}:${IMAGE_TAG}
                 '''
+
+                echo 'Checking running containers...'
 
                 sh 'docker ps'
             }
@@ -59,16 +72,19 @@ pipeline {
 
     post {
         success {
-            echo '================================'
+            echo '===================================='
             echo 'PIPELINE SUCCESS'
             echo "Docker Image: ${env.APP_NAME}:${env.IMAGE_TAG}"
-            echo 'Application Port: 1111'
-            echo '================================'
+            echo "Container: ${env.CONTAINER_NAME}"
+            echo 'Application URL: http://localhost:8081'
+            echo '===================================='
         }
 
         failure {
+            echo '===================================='
             echo 'PIPELINE FAILED'
-            echo 'Please check the Jenkins Console Output.'
+            echo 'Please check Jenkins Console Output.'
+            echo '===================================='
         }
     }
 }
