@@ -6,7 +6,9 @@ pipeline {
         APP_NAME = 'firstprojectbyusingjenkins'
         IMAGE_TAG = '1.0'
         CONTAINER_NAME = 'firstprojectbyusingjenkins-container'
-        HOST_PORT = '8081'
+
+        // Unique host port to avoid conflicts
+        HOST_PORT = '18082'
         CONTAINER_PORT = '1111'
     }
 
@@ -23,7 +25,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Running JUnit test cases...'
+                echo 'Running test cases...'
 
                 sh './mvnw test'
             }
@@ -54,6 +56,15 @@ pipeline {
                     docker rm -f ${CONTAINER_NAME} || true
                 '''
 
+                echo 'Checking whether host port is available...'
+
+                sh '''
+                    if docker ps --format '{{.Ports}}' | grep -q '0.0.0.0:${HOST_PORT}->'; then
+                        echo "ERROR: Host port ${HOST_PORT} is already in use by a Docker container."
+                        exit 1
+                    fi
+                '''
+
                 echo 'Starting Spring Boot container...'
 
                 sh '''
@@ -76,7 +87,7 @@ pipeline {
             echo 'PIPELINE SUCCESS'
             echo "Docker Image: ${env.APP_NAME}:${env.IMAGE_TAG}"
             echo "Container: ${env.CONTAINER_NAME}"
-            echo 'Application URL: http://localhost:8081'
+            echo "Application URL: http://localhost:${env.HOST_PORT}"
             echo '===================================='
         }
 
