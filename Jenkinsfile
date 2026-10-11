@@ -17,24 +17,29 @@ pipeline {
                 sh './mvnw test'
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                echo 'Building Docker Image'
+                sh 'docker build -t firstproject:1.0 .'
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                echo 'Running Spring Boot Container'
+
+                sh 'docker rm -f firstproject-container || true'
+
+                sh '''
+                    docker run -d \
+                    --name firstproject-container \
+                    -p 1111:1111 \
+                    firstproject:1.0
+                '''
+            }
+        }
     }
-
-
-stage('Docker Build') {
-    steps {
-        echo 'Building Docker Image'
-        sh 'docker build -t firstproject:1.0 .'
-    }
-}
-
-stage('Docker Run') {
-    steps {
-        echo 'Running Spring Boot Container'
-        sh 'docker rm -f firstproject-container || true'
-        sh 'docker run -d --name firstproject-container -p 1111:1111 firstproject:1.0'
-    }
-}
-
 
     post {
         success {
