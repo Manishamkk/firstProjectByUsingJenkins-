@@ -8,7 +8,7 @@ pipeline {
         CONTAINER_NAME = 'firstprojectbyusingjenkins-container'
 
         // Unique host port to avoid conflicts
-        HOST_PORT = '18082'
+        HOST_PORT = '8082'
         CONTAINER_PORT = '1111'
     }
 
